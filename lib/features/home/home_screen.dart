@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:weather_cup/features/home/widgets/weather_card.dart';
+import 'package:weather_cup/features/home/widgets/welcome_text.dart';
 
 import '../../core/theme/app_colors.dart';
 
@@ -21,25 +23,8 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Welcome Header
-                  const Text(
-                    'Welcome back, Frank!',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  const Text(
-                    'Chiang Rai, Thailand',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.black54,
-                    ),
-                  ),
+                  const WelcomeText(),
                   const SizedBox(height: 24),
-
                   // Today's Goal Card
                   Container(
                     width: double.infinity,
@@ -103,7 +88,8 @@ class HomeScreen extends StatelessWidget {
                   // Drink Water Card
                   Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 32, horizontal: 20),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -130,7 +116,8 @@ class HomeScreen extends StatelessWidget {
                             ),
                           ),
                           child: const Icon(
-                            CupertinoIcons.drop,  // ✅ Changed from Icons.local_drink_outlined
+                            CupertinoIcons
+                                .drop, // ✅ Changed from Icons.local_drink_outlined
                             size: 48,
                             color: Color(0xFF00B4D8),
                           ),
@@ -172,7 +159,8 @@ class HomeScreen extends StatelessWidget {
                                 // Handle drink button tap
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                    content: Text('Added 250 ml to your intake!'),
+                                    content:
+                                        Text('Added 250 ml to your intake!'),
                                     duration: Duration(seconds: 2),
                                   ),
                                 );
@@ -195,57 +183,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // Weather Tip Card
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE3F2FD),
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            CupertinoIcons.sun_max,  // ✅ Changed from Icons.wb_sunny_outlined
-                            size: 28,
-                            color: Color(0xFF00B4D8),
-                          ),
-                        ),
-                        const SizedBox(width: 16),
-                        const Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '18°C · Cool and breezy',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Tip: Perfect weather for staying hydrated!',
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  color: Colors.black54,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
+                  const WeatherCard(),
                 ],
               ),
             ),
