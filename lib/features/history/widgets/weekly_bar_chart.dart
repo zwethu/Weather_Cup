@@ -16,12 +16,11 @@ class WeeklyBarChart extends StatelessWidget {
     final daysReached = weeklyData.where((day) => day.isGoalReached).length;
 
     return Container(
-
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.background,  // ✅ Outer container color
-        borderRadius: BorderRadius.circular(20),
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      // decoration: BoxDecoration(
+      //   color: AppColors.background,  // ✅ Outer container color
+      //   borderRadius: BorderRadius.circular(20),
+      // ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -59,7 +58,7 @@ class WeeklyBarChart extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: AppColors.surface,  // ✅ White background
+              color: AppColors.surface, // ✅ White background
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
@@ -103,13 +102,12 @@ class WeeklyBarChart extends StatelessWidget {
 
   Widget _buildBar(DailyIntake day) {
     // Calculate bar height
-    final maxHeight = 130.0;
+    const maxHeight = 130.0;
     final barHeight = (day.percentage / 100 * maxHeight).clamp(20.0, maxHeight);
 
     // Determine bar color
-    final barColor = day.isGoalReached
-        ? AppColors.primary
-        : AppColors.progressEmpty;
+    final barColor =
+        day.isGoalReached ? AppColors.primary : AppColors.progressEmpty;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -121,7 +119,8 @@ class WeeklyBarChart extends StatelessWidget {
           height: barHeight,
           decoration: BoxDecoration(
             color: barColor,
-            borderRadius: BorderRadius.circular(18),  // ✅ Half of width for pill shape
+            borderRadius:
+                BorderRadius.circular(18), // ✅ Half of width for pill shape
           ),
         ),
         const SizedBox(height: 8),
@@ -129,7 +128,7 @@ class WeeklyBarChart extends StatelessWidget {
         // Day label
         Text(
           day.day,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 11,
             color: AppColors.textSecondary,
             fontWeight: FontWeight.w500,
