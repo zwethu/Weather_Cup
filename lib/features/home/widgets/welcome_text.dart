@@ -6,9 +6,10 @@ class WelcomeText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Welcome Header
-        const Text(
+        Text(
           'Welcome back, Frank!',
           style: TextStyle(
             fontSize: 28,
@@ -16,8 +17,8 @@ class WelcomeText extends StatelessWidget {
             color: Colors.black87,
           ),
         ),
-        const SizedBox(height: 4),
-        const Text(
+        SizedBox(height: 4),
+        Text(
           'Chiang Rai, Thailand',
           style: TextStyle(
             fontSize: 16,
