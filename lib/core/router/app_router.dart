@@ -1,7 +1,7 @@
-
 import 'package:go_router/go_router.dart';
-import 'package:weather_cup/features/onboarding/onboarding_screen.dart';
 import 'package:weather_cup/features/home/home_screen.dart';
+import 'package:weather_cup/features/home/main_screen.dart';
+import 'package:weather_cup/features/onboarding/onboarding_screen.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -13,9 +13,9 @@ class AppRouter {
         builder: (context, state) => const OnboardingScreen(),
       ),
       GoRoute(
-        path: '/home',
-        name: 'home',
-        builder: (context, state) => const HomeScreen(),
+        path: '/main',  // ✅ Changed from /home to /main
+        name: 'main',   // ✅ Changed from home to main
+        builder: (context, state) => const MainScreen(),
       ),
     ],
   );
