@@ -1,0 +1,102 @@
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:weather_cup/models/user_model.dart';
+import 'package:weather_cup/persistence/hive_boxes.dart';
+
+/// Repository for managing user data persistence with Hive
+class UserRepository {
+  static UserRepository? _instance;
+  late Box<UserModel> _userBox;
+
+  UserRepository._();
+
+  /// Singleton instance
+  static UserRepository get instance {
+    _instance ??= UserRepository._();
+    return _instance!;
+  }
+
+  /// Initialize the repository (call after Hive.initFlutter)
+  Future<void> init() async {
+    _userBox = await Hive.openBox<UserModel>(HiveBoxes.userBox);
+  }
+
+  /// Get the current user profile, or null if not set
+  UserModel? getUser() {
+    if (_userBox.isEmpty) return null;
+    return _userBox.getAt(0);
+  }
+
+  /// Check if user has completed onboarding
+  bool hasCompletedOnboarding() {
+    final user = getUser();
+    return user?.onboardingCompleted ?? false;
+  }
+
+  /// Save or update user profile
+  Future<void> saveUser(UserModel user) async {
+    if (_userBox.isEmpty) {
+      await _userBox.add(user);
+    } else {
+      await _userBox.putAt(0, user);
+    }
+  }
+
+  /// Update specific user fields
+  Future<void> updateUser({
+    String? name,
+    String? gender,
+    double? weight,
+    double? height,
+    String? wakeTime,
+    String? sleepTime,
+    String? country,
+    String? city,
+    bool? onboardingCompleted,
+  }) async {
+    final currentUser = getUser();
+    if (currentUser == null) {
+      // Create new user if none exists
+      final newUser = UserModel(
+        name: name ?? '',
+        gender: gender ?? 'Male',
+        weight: weight ?? 0,
+        height: height ?? 0,
+        wakeTime: wakeTime ?? '06:30',
+        sleepTime: sleepTime ?? '23:30',
+        country: country ?? '',
+        city: city ?? '',
+        onboardingCompleted: onboardingCompleted ?? false,
+      );
+      await saveUser(newUser);
+    } else {
+      final updatedUser = currentUser.copyWith(
+        name: name,
+        gender: gender,
+        weight: weight,
+        height: height,
+        wakeTime: wakeTime,
+        sleepTime: sleepTime,
+        country: country,
+        city: city,
+        onboardingCompleted: onboardingCompleted,
+      );
+      await saveUser(updatedUser);
+    }
+  }
+
+  /// Mark onboarding as completed
+  Future<void> completeOnboarding() async {
+    await updateUser(onboardingCompleted: true);
+  }
+
+  /// Clear all user data (for reset functionality)
+  Future<void> clearUser() async {
+    await _userBox.clear();
+  }
+
+  /// Close the box (call on app dispose if needed)
+  Future<void> close() async {
+    await _userBox.close();
+  }
+}
+

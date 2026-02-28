@@ -5,7 +5,7 @@ import 'package:weather_cup/core/theme/app_colors.dart';
 import 'package:weather_cup/features/history/history_screen.dart';
 import 'package:weather_cup/features/home/home_screen.dart';
 import 'package:weather_cup/features/home/navigation_provider.dart';
-import 'package:weather_cup/features/profile_setup/profile_screen.dart';
+import 'package:weather_cup/features/profile/profile_screen.dart';
 
 class MainScreen extends StatelessWidget {
   const MainScreen({super.key});

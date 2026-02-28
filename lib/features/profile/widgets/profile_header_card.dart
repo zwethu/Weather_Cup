@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:weather_cup/core/theme/app_colors.dart';
 import 'package:weather_cup/core/theme/app_text_styles.dart';
+import 'package:weather_cup/features/profile/user_provider.dart';
 
 class ProfileHeaderCard extends StatelessWidget {
   const ProfileHeaderCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Get user data via UserProvider
+    final userProvider = context.watch<UserProvider>();
+
     return Padding(
       padding: const EdgeInsets.fromLTRB(16, 6, 16, 16),
       child: Column(
@@ -55,7 +60,7 @@ class ProfileHeaderCard extends StatelessWidget {
                   ),
                   alignment: Alignment.center,
                   child: Text(
-                    'F',
+                    userProvider.userInitial,
                     style: AppTextStyles.displaySmall.copyWith(
                       fontSize: 24,
                       color: Colors.white,
@@ -67,10 +72,10 @@ class ProfileHeaderCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('Frank', style: AppTextStyles.subtitle1),
+                      Text(userProvider.userName, style: AppTextStyles.subtitle1),
                       const SizedBox(height: 2),
                       Text(
-                        'Chiang Rai, Thailand',
+                        userProvider.location,
                         style: AppTextStyles.caption.copyWith(
                           color: AppColors.textSecondary,
                         ),
@@ -88,7 +93,7 @@ class ProfileHeaderCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Text(
-                    'Male',
+                    userProvider.gender,
                     style: AppTextStyles.caption.copyWith(
                       color: AppColors.primaryDark,
                       fontWeight: FontWeight.w600,

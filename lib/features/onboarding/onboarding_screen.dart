@@ -47,20 +47,20 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       );
     } else {
       // Last page - navigate to home
-      _navigateToHome();
+      _navigateToProfileSetup();
     }
   }
 
   void _onSkip() {
-    // Skip all pages and go to home
-    _navigateToHome();
+    // Skip all pages and go to profile setup
+    _navigateToProfileSetup();
   }
 
-  void _navigateToHome() {
+  void _navigateToProfileSetup() {
     // Reset onboarding state
     context.read<OnboardingProvider>().reset();
-    // Navigate to home screen
-    context.go('/main');
+    // Navigate to profile setup screen
+    context.go('/profile-setup');
   }
 
   @override

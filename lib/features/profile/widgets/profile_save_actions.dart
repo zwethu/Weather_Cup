@@ -8,6 +8,7 @@ class ProfileSaveActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -32,19 +33,19 @@ class ProfileSaveActions extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 12),
-        TextButton(
-          onPressed: () {
-            // TODO: delete account
-          },
-          child: Text(
-            'Delete account',
-            style: AppTextStyles.caption.copyWith(
-              color: Colors.redAccent,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
+        // const SizedBox(height: 12),
+        // TextButton(
+        //   onPressed: () {
+        //     // TODO: delete account
+        //   },
+        //   child: Text(
+        //     'Delete account',
+        //     style: AppTextStyles.caption.copyWith(
+        //       color: Colors.redAccent,
+        //       fontWeight: FontWeight.w500,
+        //     ),
+        //   ),
+        // ),
       ],
     );
   }

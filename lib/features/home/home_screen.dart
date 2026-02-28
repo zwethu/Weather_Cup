@@ -1,7 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:weather_cup/features/home/widgets/weather_card.dart';
 import 'package:weather_cup/features/home/widgets/welcome_text.dart';
+import 'package:weather_cup/features/profile/user_provider.dart';
 
 import '../../core/theme/app_colors.dart';
 
@@ -10,6 +12,14 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Get user data via UserProvider
+    final userProvider = context.watch<UserProvider>();
+    final int dailyGoal = userProvider.recommendedDailyIntake;
+    // TODO: Get actual drunk amount from daily intake tracking
+    const int drunkAmount = 900;
+    final int remaining = dailyGoal - drunkAmount;
+    final double progress = drunkAmount / dailyGoal;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
       body: SingleChildScrollView(
@@ -51,18 +61,18 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Text(
-                          '2500 ml',
-                          style: TextStyle(
+                        Text(
+                          '$dailyGoal ml',
+                          style: const TextStyle(
                             fontSize: 36,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 12),
-                        const Text(
-                          'Drunk: 900 ml · Remaining: 1600 ml',
-                          style: TextStyle(
+                        Text(
+                          'Drunk: $drunkAmount ml · Remaining: $remaining ml',
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black54,
                           ),
@@ -71,11 +81,11 @@ class HomeScreen extends StatelessWidget {
                         // Progress Bar
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
-                          child: const LinearProgressIndicator(
-                            value: 0.36, // 900/2500
+                          child: LinearProgressIndicator(
+                            value: progress.clamp(0.0, 1.0),
                             minHeight: 12,
-                            backgroundColor: Color(0xFFE0E0E0),
-                            valueColor: AlwaysStoppedAnimation<Color>(
+                            backgroundColor: const Color(0xFFE0E0E0),
+                            valueColor: const AlwaysStoppedAnimation<Color>(
                               Color(0xFF00B4D8),
                             ),
                           ),

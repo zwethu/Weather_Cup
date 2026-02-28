@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weather_cup/core/theme/app_colors.dart';
 import 'package:weather_cup/core/theme/app_text_styles.dart';
-import 'package:weather_cup/features/profile_setup/widgets/profile_info_item.dart';
+import 'package:weather_cup/features/profile/widgets/profile_info_item.dart';
 
 class BodyInfoSection extends StatelessWidget {
   final String title;
