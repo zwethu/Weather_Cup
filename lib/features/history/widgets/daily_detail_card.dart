@@ -78,8 +78,9 @@ class DailyDetailCard extends StatelessWidget {
                 value: (percentage / 100).clamp(0.0, 1.0),
                 minHeight: 6,
                 backgroundColor: AppColors.progressEmpty,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  isGoalReached ? AppColors.primary : AppColors.progressEmpty,
+                valueColor: AlwaysStoppedAnimation<Color>(isGoalReached
+                      ? AppColors.primary  // Full color when goal reached
+                      : AppColors.primary.withOpacity(0.6),  // Lighter color when not reached
                 ),
               ),
             ),

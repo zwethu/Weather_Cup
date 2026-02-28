@@ -103,11 +103,16 @@ class WeeklyBarChart extends StatelessWidget {
   Widget _buildBar(DailyIntake day) {
     // Calculate bar height
     const maxHeight = 130.0;
-    final barHeight = (day.percentage / 100 * maxHeight).clamp(20.0, maxHeight);
+    const minHeight = 8.0; // Minimum bar height to always show something
+    final barHeight = day.amount > 0
+        ? (day.percentage / 100 * maxHeight).clamp(minHeight, maxHeight)
+        : minHeight;
 
-    // Determine bar color
-    final barColor =
-        day.isGoalReached ? AppColors.primary : AppColors.progressEmpty;
+    // Always use primary color (colored bar)
+    // Darker shade if goal reached, lighter if not
+    final barColor = day.isGoalReached
+        ? AppColors.primary
+        : AppColors.primary.withOpacity(0.7);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.end,
@@ -118,16 +123,16 @@ class WeeklyBarChart extends StatelessWidget {
           width: 40,
           height: barHeight,
           decoration: BoxDecoration(
-            color: barColor,
+            color: day.amount > 0 ? barColor : AppColors.primary.withOpacity(0.2),
             borderRadius:
-                BorderRadius.circular(18), // ✅ Half of width for pill shape
+                BorderRadius.circular(18), // Half of width for pill shape
           ),
         ),
         const SizedBox(height: 8),
 
         // Day label
         Text(
-          day.day,
+          day.dayAbbreviation,
           style: const TextStyle(
             fontSize: 11,
             color: AppColors.textSecondary,
