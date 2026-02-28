@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:weather_cup/models/user_model.dart';
 import 'package:weather_cup/persistence/user_repository.dart';
+import 'package:weather_cup/services/notification_service.dart';
 
 class ProfileSetupProvider extends ChangeNotifier {
   int _currentStep = 0;
@@ -171,6 +172,28 @@ class ProfileSetupProvider extends ChangeNotifier {
       onboardingCompleted: true,
     );
     await _userRepository.saveUser(user);
+
+    // Initialize and request permissions
+    final notificationService = NotificationService();
+    await notificationService.initializeNotifications();
+    final permissionGranted = await notificationService.requestPermissions();
+    debugPrint('🔔 Notification permission granted: $permissionGranted');
+
+    // 🧪 IMMEDIATE TEST: Show notification NOW to verify it works
+    await notificationService.showImmediateTestNotification(nickname: _name);
+
+    // Schedule hourly hydration notifications
+    // Set testMode: true to test with notifications every minute
+    final result = await notificationService.scheduleHourlyNotifications(
+      wakeTime: _wakeTime,
+      sleepTime: _sleepTime,
+      nickname: _name,
+      testMode: true, // 🧪 Change to true to test!
+    );
+    debugPrint('🔔 Notifications scheduled: $result');
+
+    // Debug: Print pending notifications
+    await notificationService.debugPrintPendingNotifications();
   }
 
   /// Load existing profile from local storage (if any)

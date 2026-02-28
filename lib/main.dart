@@ -8,12 +8,17 @@ import 'package:weather_cup/features/profile_setup/profile_setup_provider.dart';
 import 'package:weather_cup/features/settings/settings_provider.dart';
 import 'package:weather_cup/features/profile/user_provider.dart';
 import 'package:weather_cup/persistence/hive_initializer.dart';
+ import 'package:weather_cup/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   // Initialize Hive and all repositories
   await HiveInitializer.init();
+
+  // Initialize notification service
+  await NotificationService().initializeNotifications();
+  await NotificationService().requestPermissions();
 
   runApp(const WeatherCupApp());
 }
