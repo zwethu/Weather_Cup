@@ -6,12 +6,14 @@ import 'package:weather_cup/core/theme/app_colors.dart';
 import 'package:weather_cup/core/theme/app_text_styles.dart';
 import 'package:weather_cup/core/widgets/edit_bottom_sheets.dart';
 import 'package:weather_cup/features/home/navigation_provider.dart';
+import 'package:weather_cup/features/profile_setup/profile_setup_provider.dart';
 import 'package:weather_cup/features/settings/settings_provider.dart';
 import 'package:weather_cup/features/settings/widgets/daily_goal_card.dart';
 import 'package:weather_cup/features/settings/widgets/profile_card.dart';
 import 'package:weather_cup/features/settings/widgets/setting_tile.dart';
 import 'package:weather_cup/features/settings/widgets/toggle_setting_tile.dart';
 import 'package:weather_cup/features/profile/user_provider.dart';
+import 'package:weather_cup/persistence/intake_repository.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -332,6 +334,13 @@ class SettingsScreen extends StatelessWidget {
               provider.resetAllSettings();
               // Clear user data from storage
               await context.read<UserProvider>().clearUser();
+              await IntakeRepository.instance.clearAll();
+              // Also reset profile setup provider state so page view starts fresh
+              try {
+                context.read<ProfileSetupProvider>().reset();
+              } catch (_) {
+                // ignore if provider not available
+              }
               // Close dialog
               if (dialogContext.mounted) {
                 Navigator.of(dialogContext).pop();

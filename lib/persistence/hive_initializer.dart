@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:weather_cup/models/daily_intake.dart';
 import 'package:weather_cup/models/user_model.dart';
@@ -5,6 +6,7 @@ import 'package:weather_cup/models/weather_model.dart';
 import 'package:weather_cup/persistence/intake_repository.dart';
 import 'package:weather_cup/persistence/user_repository.dart';
 import 'package:weather_cup/services/weather_service.dart';
+import 'package:weather_cup/persistence/hive_boxes.dart';
 
 /// Initializes Hive and all required adapters and repositories
 class HiveInitializer {
@@ -20,6 +22,9 @@ class HiveInitializer {
 
     // Initialize repositories and services
     await _initRepositories();
+
+    // Diagnostics: print box status to help debug web persistence
+    _printDiagnostics();
   }
 
   static void _registerAdapters() {
@@ -59,5 +64,25 @@ class HiveInitializer {
     // Initialize IntakeRepository
     await IntakeRepository.instance.init();
   }
-}
 
+  static void _printDiagnostics() {
+    try {
+      final boxes = [
+        HiveBoxes.userBox,
+        HiveBoxes.dailyIntakeBox,
+        HiveBoxes.settingsBox,
+      ];
+
+      for (final name in boxes) {
+        final open = Hive.isBoxOpen(name);
+        var size = -1;
+        try {
+          if (open) size = Hive.box(name).length;
+        } catch (_) {}
+        debugPrint('🧭 Hive box "$name" open: $open, length: $size');
+      }
+    } catch (e) {
+      debugPrint('❌ Hive diagnostics error: $e');
+    }
+  }
+}

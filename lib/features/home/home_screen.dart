@@ -214,7 +214,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 color: Colors.black.withOpacity(0.3),
                                 blurRadius: 4,
                                 offset: const Offset(0, 2),
-                                inset: true,
+                                // inset: true,
                               ),
                             ],
                           ),

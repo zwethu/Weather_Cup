@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:weather_cup/models/daily_intake.dart';
+import 'package:weather_cup/persistence/hive_boxes.dart';
 
 /// Repository for managing daily water intake records
 ///
@@ -11,7 +12,8 @@ class IntakeRepository {
   static IntakeRepository get instance => _instance;
   IntakeRepository._internal();
 
-  static const String _boxName = 'daily_intake';
+  // Use the centralized box name
+  static const String _boxName = HiveBoxes.dailyIntakeBox;
   Box<DailyIntake>? _box;
   bool _isInitialized = false;
 
@@ -211,4 +213,3 @@ class IntakeRepository {
     };
   }
 }
-

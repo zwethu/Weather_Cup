@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_cup/core/theme/app_colors.dart';
 import 'package:weather_cup/features/history/history_screen.dart';
-import 'package:weather_cup/features/home/home_screen.dart';
+import 'package:weather_cup/features/home/home_screen_v1.dart';
 import 'package:weather_cup/features/home/navigation_provider.dart';
 import 'package:weather_cup/features/profile/profile_screen.dart';
 
@@ -18,7 +18,7 @@ class MainScreen extends StatelessWidget {
           body: IndexedStack(
             index: navigationProvider.currentIndex,
             children: const [
-              HomeScreen(),
+              HomeScreenV1(),
               HistoryScreen(),
               ProfileScreen(),
             ],

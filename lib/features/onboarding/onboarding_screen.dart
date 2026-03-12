@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_cup/features/onboarding/onboarding_provider.dart';
 import 'package:weather_cup/features/onboarding/widgets/onboarding_view.dart';
+import 'package:weather_cup/features/profile_setup/profile_setup_provider.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -59,6 +60,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   void _navigateToProfileSetup() {
     // Reset onboarding state
     context.read<OnboardingProvider>().reset();
+    // Also reset profile setup provider so PageView starts from the first step
+    try {
+      context.read<ProfileSetupProvider>().reset();
+    } catch (_) {
+      // If provider is not available for any reason, ignore silently
+    }
     // Navigate to profile setup screen
     context.go('/profile-setup');
   }

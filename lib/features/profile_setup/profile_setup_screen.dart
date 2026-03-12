@@ -25,6 +25,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   @override
   void initState() {
     super.initState();
+    // Default initial page is 0; we will sync with provider after first build
     _pageController = PageController();
   }
 
@@ -38,6 +39,22 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   Widget build(BuildContext context) {
     return Consumer<ProfileSetupProvider>(
       builder: (context, provider, child) {
+        // Ensure the PageController reflects provider.currentStep. Use a post frame callback
+        // so we only change pages after the current frame and avoid interfering with build.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          if (!_pageController.hasClients) return;
+          final currentPage = _pageController.page?.round() ?? _pageController.initialPage;
+          if (currentPage != provider.currentStep) {
+            // Jump without animation if the difference is large or to avoid visual glitches
+            _pageController.animateToPage(
+              provider.currentStep,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        });
+
         return Container(
           decoration:const BoxDecoration(
             gradient: AppColors.backgroundGradient,
