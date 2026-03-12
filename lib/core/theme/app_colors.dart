@@ -67,6 +67,17 @@ class AppColors {
     stops: [0.0, 0.35, 0.8], // fade to white early
   );
 
+  static const LinearGradient backgroundGradientReverse = LinearGradient(
+    begin: Alignment.bottomCenter,
+    end: Alignment.topCenter,
+    colors: [
+      backgroundGradientStart,
+      backgroundGradientMiddle,
+      backgroundGradientEnd,
+    ],
+    stops: [0.0, 0.35, 0.8], // fade to white early
+  );
+
   // Sky blue primary gradient (from-sky-400 to-sky-600)
   static const LinearGradient primaryGradient = LinearGradient(
     begin: Alignment.topLeft,
