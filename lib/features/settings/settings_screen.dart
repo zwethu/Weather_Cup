@@ -330,26 +330,24 @@ class SettingsScreen extends StatelessWidget {
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              // Reset settings provider
+              // 1. Reset ALL providers FIRST, before any navigation
               provider.resetAllSettings();
-              // Clear user data from storage
+              context.read<ProfileSetupProvider>().reset();
+
+              // 2. Clear persisted data
               await context.read<UserProvider>().clearUser();
               await IntakeRepository.instance.clearAll();
-              // Also reset profile setup provider state so page view starts fresh
-              try {
-                context.read<ProfileSetupProvider>().reset();
-              } catch (_) {
-                // ignore if provider not available
-              }
-              // Close dialog
-              if (dialogContext.mounted) {
-                Navigator.of(dialogContext).pop();
-              }
-              // Navigate to onboarding
-              if (context.mounted) {
-                context.go('/');
-              }
+
+              // 3. Also reset HydrationProvider (whatever holds history in memory)
+              // context.read<HydrationProvider>().reset(); // ← ADD THIS
+
+              // 4. Close dialog first
+              if (dialogContext.mounted) Navigator.of(dialogContext).pop();
+
+              // 5. Navigate LAST, after all resets are done
+              if (context.mounted) context.go('/');
             },
+
             child: const Text('Reset'),
           ),
         ],
