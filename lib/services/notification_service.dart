@@ -29,11 +29,11 @@ class NotificationService {
 
   /// Notification messages that rotate for variety
   static const List<String> _notificationMessages = [
-    "Hey {nickname}, time to hydrate! 💧",
-    "{nickname}, don't forget your water! 🌊",
+    "Hey {nickname}, time to hydrate! 💙",
+    "{nickname}, don't forget your water! 💙",
     "Water break, {nickname}! Your body will thank you 💙",
-    "Stay hydrated, {nickname}! 💦",
-    "{nickname}, sip some water! 🥤",
+    "Stay hydrated, {nickname}! 💙",
+    "{nickname}, sip some water! 💙",
   ];
 
   /// Android notification channel configuration
@@ -222,6 +222,13 @@ class NotificationService {
 
         // Calculate notification hours
         notificationTimes = _calculateNotificationTimes(startTime, endTime);
+        debugPrint("------------------------------");
+        debugPrint('Wake: $wakeTime, Sleep: $sleepTime');
+        debugPrint('StartTime (wake+1): $startTime, EndTime (sleep-1): $endTime');
+        debugPrint('Calculated ${notificationTimes.length} production notification times:');
+        for (final t in notificationTimes) {
+          debugPrint('  - $t');
+        }
       }
 
       if (notificationTimes.isEmpty) {
@@ -249,6 +256,7 @@ class NotificationService {
       }
 
       debugPrint('Scheduled ${notificationTimes.length} ${testMode ? "test" : "hourly"} notifications');
+
       return true;
     } catch (e) {
       debugPrint('Error scheduling hourly notifications: $e');
@@ -279,26 +287,21 @@ class NotificationService {
     return TimeOfDay(hour: newHour, minute: time.minute);
   }
 
-  /// Calculate all notification times between start and end times.
-  ///
-  /// Returns a list of TimeOfDay objects representing each hour to notify.
   List<TimeOfDay> _calculateNotificationTimes(TimeOfDay startTime, TimeOfDay endTime) {
     final List<TimeOfDay> times = [];
 
     TimeOfDay currentTime = startTime;
-
-    // Handle cases where end time might be before start time (crosses midnight)
-    // For normal cases, iterate from start to end
     int iterations = 0;
-    const int maxIterations = 24; // Safety limit
+    const int maxIterations = 24;
 
     while (iterations < maxIterations) {
-      // Check if we've passed the end time
-      if (_isTimeAfter(currentTime, endTime)) {
+      times.add(currentTime);
+
+      // Stop when we reach the end time
+      if (currentTime.hour == endTime.hour && currentTime.minute == endTime.minute) {
         break;
       }
 
-      times.add(currentTime);
       currentTime = _addHours(currentTime, 1);
       iterations++;
     }

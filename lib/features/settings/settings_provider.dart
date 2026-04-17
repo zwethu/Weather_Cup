@@ -32,9 +32,11 @@ class SettingsProvider extends ChangeNotifier {
           nickname: user.name,
           testMode: false, // 🧪 Change to true to test!
         );
+        debugPrint("notification: $value");
       }
     } else {
       // Disable notifications
+      debugPrint("notification: $value");
       await _notificationService.cancelAllNotifications();
     }
   }
