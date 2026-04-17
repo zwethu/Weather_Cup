@@ -7,7 +7,7 @@ class ToggleSettingTile extends StatelessWidget {
   final String title;
   final String? subtitle;
   final bool value;
-  final ValueChanged<bool> onChanged;
+  final ValueChanged<bool>? onChanged; // nullable to support disabled state
 
   const ToggleSettingTile({
     super.key,
@@ -20,6 +20,8 @@ class ToggleSettingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDisabled = onChanged == null;
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
       child: Row(
@@ -29,13 +31,14 @@ class ToggleSettingTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.1),
+              color: (isDisabled ? AppColors.textSecondary : AppColors.primary)
+                  .withOpacity(0.1),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
               icon,
               size: 22,
-              color: AppColors.primary,
+              color: isDisabled ? AppColors.textSecondary : AppColors.primary,
             ),
           ),
           const SizedBox(width: 16),
@@ -46,7 +49,9 @@ class ToggleSettingTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: AppTextStyles.subtitle1,
+                  style: AppTextStyles.subtitle1.copyWith(
+                    color: isDisabled ? AppColors.textSecondary : null,
+                  ),
                 ),
                 if (subtitle != null) ...[
                   const SizedBox(height: 2),
@@ -60,7 +65,7 @@ class ToggleSettingTile extends StatelessWidget {
               ],
             ),
           ),
-          // Toggle switch
+          // Toggle switch — null onChanged disables it natively
           CupertinoSwitch(
             value: value,
             onChanged: onChanged,

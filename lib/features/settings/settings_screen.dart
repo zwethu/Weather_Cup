@@ -22,7 +22,6 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<SettingsProvider>(
       builder: (context, provider, child) {
-        // Get user data via UserProvider
         final userProvider = context.watch<UserProvider>();
 
         return Container(
@@ -34,11 +33,9 @@ class SettingsScreen extends StatelessWidget {
             appBar: AppBar(
               backgroundColor: Colors.transparent,
               elevation: 0,
-              // Reduce the gap between the leading widget and the title
               leadingWidth: 44,
               titleSpacing: 8,
               leading: IconButton(
-                // Remove default padding to bring the icon closer to the title
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                 icon: const Icon(
@@ -72,7 +69,6 @@ class SettingsScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Subtitle
                   Padding(
                     padding: const EdgeInsets.only(left: 4, bottom: 16),
                     child: Text(
@@ -83,19 +79,16 @@ class SettingsScreen extends StatelessWidget {
                     ),
                   ),
 
-                  // Profile Card
                   ProfileCard(
                     name: userProvider.userName,
                     onTap: () {
-                      // Navigate back and switch to profile tab
                       Navigator.of(context).pop();
-                      context.read<NavigationProvider>().setIndex(2); // Profile tab
+                      context.read<NavigationProvider>().setIndex(2);
                     },
                   ),
 
                   const SizedBox(height: 24),
 
-                  // Notifications Section
                   _buildSectionTitle('Notifications'),
                   const SizedBox(height: 8),
                   Container(
@@ -120,29 +113,32 @@ class SettingsScreen extends StatelessWidget {
                           value: provider.hourlyReminders,
                           onChanged: provider.toggleHourlyReminders,
                         ),
-                        // const Divider(
-                        //   height: 1,
-                        //   color: AppColors.divider,
-                        //   indent: 72,
-                        // ),
-                        // ToggleSettingTile(
-                        //   icon: CupertinoIcons.device_phone_portrait,
-                        //   title: 'Vibration only',
-                        //   value: provider.vibrationOnly,
-                        //   onChanged: provider.toggleVibration,
-                        // ),
+                        const Divider(
+                          height: 1,
+                          color: AppColors.divider,
+                          indent: 72,
+                        ),
+                        // 🧪 Test mode — disabled when hourly reminders are OFF
+                        ToggleSettingTile(
+                          icon: CupertinoIcons.lab_flask,
+                          title: 'Test mode',
+                          subtitle:
+                              'Send 5 quick test reminders, one minute apart.',
+                          value: provider.testMode,
+                          onChanged: provider.hourlyReminders
+                              ? provider.toggleTestMode
+                              : null,
+                        ),
                       ],
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  // Hydration Preferences Section
                   _buildSectionTitle('Hydration preferences'),
                   const SizedBox(height: 8),
                   DailyGoalCard(
                     onTap: () async {
-                      // Daily goal is based on weight, so edit weight
                       final result = await showEditTextBottomSheet(
                         context: context,
                         title: 'Weight',
@@ -166,62 +162,9 @@ class SettingsScreen extends StatelessWidget {
                     },
                   ),
 
-                  // Location Section
-                  // _buildSectionTitle('Location'),
-                  // const SizedBox(height: 8),
-                  // Container(
-                  //   decoration: BoxDecoration(
-                  //     color: AppColors.surface,
-                  //     borderRadius: BorderRadius.circular(16),
-                  //     boxShadow: [
-                  //       BoxShadow(
-                  //         color: Colors.black.withOpacity(0.05),
-                  //         blurRadius: 10,
-                  //         offset: const Offset(0, 4),
-                  //       ),
-                  //     ],
-                  //   ),
-                  //   child: Column(
-                  //     children: [
-                  //       SettingTile(
-                  //         icon: CupertinoIcons.location,
-                  //         title: 'Country',
-                  //         subtitle: provider.country,
-                  //         onTap: () {
-                  //           // TODO: Open country selector
-                  //         },
-                  //       ),
-                  //       const Divider(
-                  //         height: 1,
-                  //         color: AppColors.divider,
-                  //         indent: 72,
-                  //       ),
-                  //       SettingTile(
-                  //         icon: CupertinoIcons.location_fill,
-                  //         title: 'City',
-                  //         subtitle: provider.city,
-                  //         onTap: () {
-                  //           // TODO: Open city selector
-                  //         },
-                  //       ),
-                  //     ],
-                  //   ),
-                  // ),
-                  // Padding(
-                  //   padding: const EdgeInsets.only(left: 4, top: 8),
-                  //   child: Text(
-                  //     'Used only to fetch local weather.',
-                  //     style: AppTextStyles.caption.copyWith(
-                  //       color: AppColors.textSecondary,
-                  //       fontSize: 11,
-                  //     ),
-                  //   ),
-                  // ),
-
                   const SizedBox(height: 24),
                   _buildSectionTitle('About App'),
                   const SizedBox(height: 8),
-                  // Other Settings
                   Container(
                     decoration: BoxDecoration(
                       color: AppColors.surface,
@@ -236,14 +179,6 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        // SettingTile(
-                        //   icon: CupertinoIcons.paintbrush,
-                        //   title: 'Appearance',
-                        //   subtitle: provider.appearance,
-                        //   onTap: () {
-                        //     // TODO: Open appearance selector
-                        //   },
-                        // ),
                         const Divider(
                           height: 1,
                           color: AppColors.divider,
@@ -274,7 +209,6 @@ class SettingsScreen extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  // Reset Button
                   Center(
                     child: TextButton(
                       onPressed: () {
@@ -330,24 +264,15 @@ class SettingsScreen extends StatelessWidget {
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              // 1. Reset ALL providers FIRST, before any navigation
               provider.resetAllSettings();
               context.read<ProfileSetupProvider>().reset();
 
-              // 2. Clear persisted data
               await context.read<UserProvider>().clearUser();
               await IntakeRepository.instance.clearAll();
 
-              // 3. Also reset HydrationProvider (whatever holds history in memory)
-              // context.read<HydrationProvider>().reset(); // ← ADD THIS
-
-              // 4. Close dialog first
               if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-
-              // 5. Navigate LAST, after all resets are done
               if (context.mounted) context.go('/');
             },
-
             child: const Text('Reset'),
           ),
         ],
