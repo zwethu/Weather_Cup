@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:weather_cup/features/onboarding/onboarding_provider.dart';
 import 'package:weather_cup/features/onboarding/widgets/onboarding_view.dart';
 import 'package:weather_cup/features/profile_setup/profile_setup_provider.dart';
+import 'package:weather_cup/persistence/user_repository.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -39,35 +40,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   void _onNext() {
     final provider = context.read<OnboardingProvider>();
-
     if (!provider.isLastPage) {
-      // Go to next page
       _pageController.nextPage(
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeInOut,
       );
     } else {
-      // Last page - navigate to home
-      _navigateToProfileSetup();
+      _navigateToLogin(); // ← renamed
     }
   }
 
   void _onSkip() {
-    // Skip all pages and go to profile setup
-    _navigateToProfileSetup();
+    _navigateToLogin(); // ← renamed
   }
 
-  void _navigateToProfileSetup() {
-    // Reset onboarding state
-    context.read<OnboardingProvider>().reset();
-    // Also reset profile setup provider so PageView starts from the first step
-    try {
-      context.read<ProfileSetupProvider>().reset();
-    } catch (_) {
-      // If provider is not available for any reason, ignore silently
-    }
-    // Navigate to profile setup screen
-    context.go('/profile-setup');
+  void _navigateToLogin() async {
+    // ✅ Correct — it's on UserRepository, not OnboardingProvider
+    await UserRepository.instance.completeOnboarding();
+    if (mounted) context.go('/login');
   }
 
   @override

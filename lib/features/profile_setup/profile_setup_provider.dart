@@ -188,7 +188,7 @@ class ProfileSetupProvider extends ChangeNotifier {
       wakeTime: _wakeTime,
       sleepTime: _sleepTime,
       nickname: _name,
-      testMode: true, //   🧪 Change to true to test!
+      testMode: false, //   🧪 Change to true to test!
     );
     debugPrint('🔔 Notifications scheduled: $result');
 

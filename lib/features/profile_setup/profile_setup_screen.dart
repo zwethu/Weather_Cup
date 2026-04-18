@@ -11,6 +11,8 @@ import 'package:weather_cup/features/profile_setup/widgets/personal_info_step.da
 import 'package:weather_cup/features/profile_setup/widgets/progress_stepper.dart';
 import 'package:weather_cup/features/profile_setup/widgets/welcome_step.dart';
 import 'package:weather_cup/features/profile/user_provider.dart';
+import 'package:weather_cup/services/auth_service.dart';
+import 'package:weather_cup/services/firestore_service.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -149,6 +151,15 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                                       if (provider.isLastStep) {
                                         // Save profile to local storage
                                         await provider.saveProfile();
+
+                                        // ── NEW: sync to Firestore ──
+                                        final uid = AuthService.instance.currentUser?.uid;
+                                        if (uid != null && context.mounted) {
+                                          final user = context.read<UserProvider>().user; // your UserModel
+                                          await FirestoreService.instance.saveUserProfile(uid, user!);
+                                        }
+                                        // ───────────────────────────
+
                                         // Refresh UserProvider so all views get updated data
                                         if (context.mounted) {
                                           context.read<UserProvider>().refresh();

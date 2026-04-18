@@ -1,16 +1,1 @@
-{
-  "hosting": {
-    "public": "build/web",
-    "ignore": [
-      "firebase.json",
-      "**/.*",
-      "**/node_modules/**"
-    ],
-    "rewrites": [
-      {
-        "source": "**",
-        "destination": "/index.html"
-      }
-    ]
-  }
-}
+{"hosting":{"public":"build/web","ignore":["firebase.json","**/.*","**/node_modules/**"],"rewrites":[{"source":"**","destination":"/index.html"}]},"flutter":{"platforms":{"android":{"default":{"projectId":"weather-cup123","appId":"1:732239345656:android:4c26e5c66cd9afc3a8880d","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"weather-cup123","configurations":{"android":"1:732239345656:android:4c26e5c66cd9afc3a8880d","ios":"1:732239345656:ios:77a58796cd6df431a8880d","macos":"1:732239345656:ios:77a58796cd6df431a8880d","web":"1:732239345656:web:e19ceebbe5e835dba8880d","windows":"1:732239345656:web:b8d7be307b6fe3faa8880d"}}}}}}

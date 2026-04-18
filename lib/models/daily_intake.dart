@@ -107,6 +107,20 @@ class DailyIntake extends HiveObject {
     return 'DailyIntake(date: $formattedDate, amount: ${amount}ml, '
         'goal: ${goal}ml, percentage: $percentage%)';
   }
+
+  Map<String, dynamic> toFirestoreMap() {
+    return {
+      'date': this.date.toIso8601String(),       // ← this.date
+      'amount': this.amount,                      // ← this.amount
+      'goal': this.goal,                          // ← this.goal
+      'temperature': this.temperature,
+      'weatherCondition': this.weatherCondition,
+      'entries': this.entries.map((e) => {        // ← this.entries
+        'timestamp': e.timestamp.toIso8601String(),
+        'amount': e.amount,
+      }).toList(),
+    };
+  }
 }
 
 /// Individual drink entry with timestamp
@@ -131,5 +145,7 @@ class DrinkEntry {
 
   @override
   String toString() => 'DrinkEntry($formattedTime: ${amount}ml)';
+
+
 }
 

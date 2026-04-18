@@ -1,18 +1,23 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:weather_cup/core/router/app_router.dart';
 import 'package:weather_cup/core/theme/app_theme.dart';
+import 'package:weather_cup/features/auth/auth_provider.dart';
 import 'package:weather_cup/features/history/intake_provider.dart';
 import 'package:weather_cup/features/home/navigation_provider.dart';
 import 'package:weather_cup/features/onboarding/onboarding_provider.dart';
 import 'package:weather_cup/features/profile_setup/profile_setup_provider.dart';
 import 'package:weather_cup/features/settings/settings_provider.dart';
 import 'package:weather_cup/features/profile/user_provider.dart';
+import 'package:weather_cup/firebase_options.dart';
 import 'package:weather_cup/persistence/hive_initializer.dart';
 import 'package:weather_cup/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Initialize Hive and all repositories
   await HiveInitializer.init();
@@ -37,6 +42,7 @@ class WeatherCupApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => NavigationProvider()),
         ChangeNotifierProvider(create: (_) => SettingsProvider()),
         ChangeNotifierProvider(create: (_) => ProfileSetupProvider()),
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: MaterialApp.router(
         title: 'Weather Cup',

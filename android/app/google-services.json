@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "732239345656",
+    "project_id": "weather-cup123",
+    "storage_bucket": "weather-cup123.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732239345656:android:4c26e5c66cd9afc3a8880d",
+        "android_client_info": {
+          "package_name": "com.weathercup.weather_cup"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_m1ALi0-OigXPtoeocP7kKC__vAvnE2I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
