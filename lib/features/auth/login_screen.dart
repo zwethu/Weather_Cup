@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:weather_cup/core/theme/app_colors.dart';
 import 'package:weather_cup/core/theme/app_text_styles.dart';
 import 'package:weather_cup/features/auth/auth_provider.dart';
+import 'package:weather_cup/features/profile/user_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -42,7 +43,16 @@ class _LoginScreenState extends State<LoginScreen> {
       email: _emailController.text,
       password: _passwordController.text,
     );
-    if (success && mounted) context.go('/main');
+    if (!mounted) return;
+    if (success) {
+      // AuthProvider.signIn already hydrated Hive from Firestore. Refresh
+      // UserProvider so the home/profile screens pick up the synced data
+      // before the router redirects to /main.
+      context.read<UserProvider>().refresh();
+      // Let the router's redirect logic decide between /profile-setup and
+      // /main based on the freshly-synced profileSetupComplete flag.
+      context.go('/main');
+    }
   }
 
   @override

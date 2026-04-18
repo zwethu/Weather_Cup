@@ -18,36 +18,52 @@ class AppRouter {
     initialLocation: '/',
     redirect: (context, state) async {
       final loc = state.matchedLocation;
-
-      // 1. Onboarding — always first on fresh install
-      final hasSeenOnboarding = UserRepository.instance.hasCompletedOnboarding();
-      if (!hasSeenOnboarding) {
-        if (loc == '/') return null; // stay on onboarding
-        return '/';
-      }
-
-      // 2. Not logged in → go to login
-      final user = AuthService.instance.currentUser;
       final isAuthRoute = loc == '/login' ||
           loc == '/register' ||
           loc == '/forgot-password' ||
           loc == '/terms';
 
+      final user = AuthService.instance.currentUser;
+
+      // 1. Not logged in → onboarding first (for brand-new installs),
+      //    then the auth flow.
       if (user == null) {
+        final hasSeenOnboarding =
+            UserRepository.instance.hasCompletedOnboarding();
+        if (!hasSeenOnboarding) {
+          return loc == '/' ? null : '/';
+        }
         if (isAuthRoute) return null;
         return '/login';
       }
 
-      // 3. Logged in → check if profile is set up
-      final profileComplete =
-      await FirestoreService.instance.isProfileSetupComplete(user.uid);
+      // 2. Logged in → determine profile completeness from the synced
+      //    Hive record. AuthProvider.signIn hydrates Hive from Firestore
+      //    immediately after a successful login, so this is authoritative
+      //    and matches what UserProvider will render. If Hive is empty
+      //    (first-time profile setup, or sync found no cloud doc), we fall
+      //    back to Firestore as a safety net.
+      var profileComplete =
+          UserRepository.instance.getUser()?.onboardingCompleted ?? false;
+
+      if (!profileComplete) {
+        final cloudComplete = await FirestoreService.instance
+            .isProfileSetupComplete(user.uid);
+        if (cloudComplete) {
+          // Cloud says complete but Hive is empty — re-hydrate now so
+          // UserProvider can render /main without a null user.
+          final synced =
+              await UserRepository.instance.syncFromCloud(user.uid);
+          profileComplete = synced != null;
+        }
+      }
 
       if (!profileComplete) {
         if (loc == '/profile-setup') return null;
         return '/profile-setup';
       }
 
-      // 4. Fully set up → go to main
+      // 3. Fully set up → go to main.
       if (loc == '/' || isAuthRoute || loc == '/profile-setup') {
         return '/main';
       }

@@ -11,6 +11,7 @@ import 'package:weather_cup/features/profile_setup/widgets/personal_info_step.da
 import 'package:weather_cup/features/profile_setup/widgets/progress_stepper.dart';
 import 'package:weather_cup/features/profile_setup/widgets/welcome_step.dart';
 import 'package:weather_cup/features/profile/user_provider.dart';
+import 'package:weather_cup/persistence/user_repository.dart';
 import 'package:weather_cup/services/auth_service.dart';
 import 'package:weather_cup/services/firestore_service.dart';
 
@@ -149,18 +150,29 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                               provider.canProceedFromStep(provider.currentStep)
                                   ? () async {
                                       if (provider.isLastStep) {
-                                        // Save profile to local storage
+                                        // 1. Save profile to local Hive storage.
                                         await provider.saveProfile();
 
-                                        // ── NEW: sync to Firestore ──
-                                        final uid = AuthService.instance.currentUser?.uid;
-                                        if (uid != null && context.mounted) {
-                                          final user = context.read<UserProvider>().user; // your UserModel
-                                          await FirestoreService.instance.saveUserProfile(uid, user!);
-                                        }
-                                        // ───────────────────────────
+                                        // 2. Read the freshly-written user
+                                        //    from Hive (NOT from UserProvider,
+                                        //    which has not been refreshed yet
+                                        //    and may still be null).
+                                        final savedUser =
+                                            UserRepository.instance.getUser();
+                                        final uid = AuthService.instance
+                                            .currentUser?.uid;
 
-                                        // Refresh UserProvider so all views get updated data
+                                        // 3. Sync Hive → Firestore so the
+                                        //    cloud record matches local state
+                                        //    and profileSetupComplete is set.
+                                        if (uid != null && savedUser != null) {
+                                          await FirestoreService.instance
+                                              .saveUserProfile(
+                                                  uid, savedUser);
+                                        }
+
+                                        // 4. Refresh UserProvider so every
+                                        //    screen re-reads the new Hive data.
                                         if (context.mounted) {
                                           context.read<UserProvider>().refresh();
                                           context.go('/main');
