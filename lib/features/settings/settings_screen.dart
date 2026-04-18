@@ -5,15 +5,14 @@ import 'package:provider/provider.dart';
 import 'package:weather_cup/core/theme/app_colors.dart';
 import 'package:weather_cup/core/theme/app_text_styles.dart';
 import 'package:weather_cup/core/widgets/edit_bottom_sheets.dart';
+import 'package:weather_cup/features/auth/auth_provider.dart';
 import 'package:weather_cup/features/home/navigation_provider.dart';
-import 'package:weather_cup/features/profile_setup/profile_setup_provider.dart';
 import 'package:weather_cup/features/settings/settings_provider.dart';
 import 'package:weather_cup/features/settings/widgets/daily_goal_card.dart';
 import 'package:weather_cup/features/settings/widgets/profile_card.dart';
 import 'package:weather_cup/features/settings/widgets/setting_tile.dart';
 import 'package:weather_cup/features/settings/widgets/toggle_setting_tile.dart';
 import 'package:weather_cup/features/profile/user_provider.dart';
-import 'package:weather_cup/persistence/intake_repository.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -209,17 +208,38 @@ class SettingsScreen extends StatelessWidget {
 
                   const SizedBox(height: 24),
 
-                  Center(
-                    child: TextButton(
-                      onPressed: () {
-                        _showResetDialog(context, provider);
-                      },
-                      child: Text(
-                        'Reset all settings',
-                        style: AppTextStyles.buttonText.copyWith(
-                          color: AppColors.error,
+                  _buildSectionTitle('Account'),
+                  const SizedBox(height: 8),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.05),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
                         ),
-                      ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        SettingTile(
+                          icon: CupertinoIcons.square_arrow_right,
+                          title: 'Log out',
+                          onTap: () => _confirmLogout(context),
+                        ),
+                        const Divider(
+                          height: 1,
+                          color: AppColors.divider,
+                          indent: 72,
+                        ),
+                        SettingTile(
+                          icon: CupertinoIcons.delete,
+                          title: 'Delete account',
+                          onTap: () => _confirmDeleteAccount(context),
+                        ),
+                      ],
                     ),
                   ),
 
@@ -248,32 +268,107 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  void _showResetDialog(BuildContext context, SettingsProvider provider) {
+  // ─── Account actions ────────────────────────────────
+
+  void _confirmLogout(BuildContext context) {
     showCupertinoDialog(
       context: context,
       builder: (dialogContext) => CupertinoAlertDialog(
-        title: const Text('Reset all settings?'),
+        title: const Text('Log out?'),
         content: const Text(
-          'This will clear all your data and return to the onboarding screen.',
+          'You will need to sign in again to use Weather Cup.',
         ),
         actions: [
           CupertinoDialogAction(
-            child: const Text('Cancel'),
             onPressed: () => Navigator.of(dialogContext).pop(),
+            child: const Text('Cancel'),
           ),
           CupertinoDialogAction(
             isDestructiveAction: true,
             onPressed: () async {
-              provider.resetAllSettings();
-              context.read<ProfileSetupProvider>().reset();
-
-              await context.read<UserProvider>().clearUser();
-              await IntakeRepository.instance.clearAll();
-
-              if (dialogContext.mounted) Navigator.of(dialogContext).pop();
-              if (context.mounted) context.go('/');
+              Navigator.of(dialogContext).pop();
+              await context.read<AuthProvider>().signOut();
+              if (context.mounted) context.go('/login');
             },
-            child: const Text('Reset'),
+            child: const Text('Log out'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _confirmDeleteAccount(BuildContext context) async {
+    final password = await _promptForPassword(context);
+    if (password == null || password.isEmpty) return;
+    if (!context.mounted) return;
+
+    final confirmed = await showCupertinoDialog<bool>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Delete account?'),
+        content: const Text(
+          'This permanently deletes your profile, hydration history, '
+          'and account. This cannot be undone.',
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    final auth = context.read<AuthProvider>();
+    final success = await auth.deleteAccount(password: password);
+    if (!context.mounted) return;
+
+    if (success) {
+      context.go('/login');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(auth.errorMessage ?? 'Could not delete account.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+    }
+  }
+
+  /// Modal that asks the user to re-enter their password so we can
+  /// re-authenticate before deleting the account (Firebase requires a
+  /// recent login for `user.delete()`).
+  Future<String?> _promptForPassword(BuildContext context) {
+    final controller = TextEditingController();
+    return showCupertinoDialog<String>(
+      context: context,
+      builder: (dialogContext) => CupertinoAlertDialog(
+        title: const Text('Confirm it\'s you'),
+        content: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: CupertinoTextField(
+            controller: controller,
+            placeholder: 'Current password',
+            obscureText: true,
+            autofocus: true,
+          ),
+        ),
+        actions: [
+          CupertinoDialogAction(
+            onPressed: () => Navigator.of(dialogContext).pop(null),
+            child: const Text('Cancel'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () =>
+                Navigator.of(dialogContext).pop(controller.text),
+            child: const Text('Continue'),
           ),
         ],
       ),

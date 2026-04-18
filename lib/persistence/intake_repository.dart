@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:hive/hive.dart';
 import 'package:weather_cup/models/daily_intake.dart';
 import 'package:weather_cup/persistence/hive_boxes.dart';
+import 'package:weather_cup/services/auth_service.dart';
+import 'package:weather_cup/services/firestore_service.dart';
 
 /// Repository for managing daily water intake records
 ///
@@ -63,13 +65,26 @@ class IntakeRepository {
     return _box?.get(key);
   }
 
-  /// Save/update intake record
+  /// Save/update intake record (write-through to Firestore when signed in).
   Future<void> saveIntake(DailyIntake intake) async {
     if (!_isInitialized) await init();
 
     final key = _dateKey(intake.date);
     await _box?.put(key, intake);
     debugPrint('💾 Saved intake: $intake');
+
+    // Mirror to Firestore so the record survives reinstalls / device
+    // changes. Failures are logged but never rethrown — the local write
+    // already succeeded and the user should not see a crash because the
+    // network hiccuped.
+    final uid = AuthService.instance.currentUser?.uid;
+    if (uid != null) {
+      try {
+        await FirestoreService.instance.saveHydrationData(uid, intake);
+      } catch (e) {
+        debugPrint('⚠️ Failed to sync hydration to Firestore: $e');
+      }
+    }
   }
 
   /// Add drink to today's record
@@ -177,10 +192,40 @@ class IntakeRepository {
     return records;
   }
 
-  /// Clear all records
+  /// Clear all records (local only).
   Future<void> clearAll() async {
     await _box?.clear();
     debugPrint('🗑️ Cleared all intake records');
+  }
+
+  /// Hydrate the local Hive box from Firestore for the given [uid].
+  ///
+  /// Pulls the last [daysBack] days of hydration records (default 7 —
+  /// enough to render the weekly bar chart) and writes them into Hive.
+  ///
+  /// Returns the number of records synced.
+  Future<int> syncFromCloud(String uid, {int daysBack = 7}) async {
+    if (!_isInitialized) await init();
+    if (_box == null) return 0;
+
+    int synced = 0;
+    final now = DateTime.now();
+    for (int i = 0; i < daysBack; i++) {
+      final date = now.subtract(Duration(days: i));
+      try {
+        final data =
+            await FirestoreService.instance.getHydrationData(uid, date);
+        if (data == null) continue;
+        final intake = DailyIntake.fromFirestoreMap(data);
+        final key = _dateKey(intake.date);
+        await _box!.put(key, intake);
+        synced++;
+      } catch (e) {
+        debugPrint('⚠️ Failed to sync $i-days-ago hydration: $e');
+      }
+    }
+    debugPrint('☁️ Hydration sync from cloud: $synced record(s)');
+    return synced;
   }
 
   /// Get statistics

@@ -121,6 +121,39 @@ class DailyIntake extends HiveObject {
       }).toList(),
     };
   }
+
+  /// Rebuild a DailyIntake from a Firestore map (inverse of [toFirestoreMap]).
+  factory DailyIntake.fromFirestoreMap(Map<String, dynamic> map) {
+    final rawDate = map['date'];
+    final parsedDate = rawDate is String
+        ? DateTime.parse(rawDate)
+        : (rawDate as DateTime? ?? DateTime.now());
+    final dayOnly =
+        DateTime(parsedDate.year, parsedDate.month, parsedDate.day);
+
+    final rawEntries = (map['entries'] as List?) ?? const [];
+    final entries = rawEntries
+        .whereType<Map>()
+        .map((e) {
+          final ts = e['timestamp'];
+          return DrinkEntry(
+            timestamp: ts is String
+                ? DateTime.parse(ts)
+                : (ts as DateTime? ?? DateTime.now()),
+            amount: (e['amount'] as num?)?.toInt() ?? 0,
+          );
+        })
+        .toList();
+
+    return DailyIntake(
+      date: dayOnly,
+      amount: (map['amount'] as num?)?.toInt() ?? 0,
+      goal: (map['goal'] as num?)?.toInt() ?? 2500,
+      temperature: (map['temperature'] as num?)?.toDouble(),
+      weatherCondition: map['weatherCondition'] as String?,
+      entries: entries,
+    );
+  }
 }
 
 /// Individual drink entry with timestamp

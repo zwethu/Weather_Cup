@@ -69,6 +69,35 @@ class FirestoreService {
     return results;
   }
 
+  /// Delete a single day's hydration document.
+  Future<void> deleteHydrationData(String uid, DateTime date) async {
+    final dateKey = _formatDate(date);
+    await _db
+        .collection('users')
+        .doc(uid)
+        .collection('hydration')
+        .doc(dateKey)
+        .delete();
+  }
+
+  // ─── Account Deletion ──────────────────────────────
+
+  /// Delete the entire user document and its hydration subcollection.
+  ///
+  /// Firestore does not cascade-delete subcollections, so we wipe
+  /// `users/{uid}/hydration/*` first, then the parent doc.
+  Future<void> deleteAllUserData(String uid) async {
+    final hydrationRef =
+        _db.collection('users').doc(uid).collection('hydration');
+    final snapshot = await hydrationRef.get();
+    final batch = _db.batch();
+    for (final doc in snapshot.docs) {
+      batch.delete(doc.reference);
+    }
+    batch.delete(_db.collection('users').doc(uid));
+    await batch.commit();
+  }
+
   String _formatDate(DateTime date) =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 }

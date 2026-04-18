@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:weather_cup/models/user_model.dart';
 import 'package:weather_cup/models/weather_model.dart';
 import 'package:weather_cup/persistence/user_repository.dart';
+import 'package:weather_cup/services/auth_service.dart';
+import 'package:weather_cup/services/firestore_service.dart';
 import 'package:weather_cup/services/weather_service.dart';
 
 /// Provider that acts as a layer between views and persistence
@@ -181,14 +183,19 @@ class UserProvider extends ChangeNotifier {
     await fetchWeather();
   }
 
-  /// Save user to storage
+  /// Save user to storage (Hive) and sync to Firestore if signed in.
   Future<void> saveUser(UserModel user) async {
     await _repository.saveUser(user);
     _user = user;
     notifyListeners();
+    await _syncCurrentUserToFirestore();
   }
 
-  /// Update specific user fields
+  /// Update specific user fields in both Hive and Firestore.
+  ///
+  /// Any edits made from Settings / Profile screens flow through here,
+  /// so every field mutation (weight, wakeTime, city, etc.) is mirrored
+  /// to the cloud automatically.
   Future<void> updateUser({
     String? name,
     String? gender,
@@ -212,6 +219,23 @@ class UserProvider extends ChangeNotifier {
       onboardingCompleted: onboardingCompleted,
     );
     _loadUser();
+    await _syncCurrentUserToFirestore();
+  }
+
+  /// Push the currently loaded Hive user to Firestore (best-effort).
+  ///
+  /// Silently no-ops if the user is not signed in or if Hive has no
+  /// record yet — we never want a failed cloud sync to break a local
+  /// edit.
+  Future<void> _syncCurrentUserToFirestore() async {
+    final uid = AuthService.instance.currentUser?.uid;
+    final local = _user;
+    if (uid == null || local == null) return;
+    try {
+      await FirestoreService.instance.saveUserProfile(uid, local);
+    } catch (e) {
+      debugPrint('⚠️ Failed to sync user profile to Firestore: $e');
+    }
   }
 
   /// Mark onboarding as completed
